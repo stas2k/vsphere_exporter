@@ -134,15 +134,15 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	hosts, err := e.finder.HostSystemList(e.ctx, "*")
+	vms, err := e.finder.VirtualMachineList(e.ctx, "*")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, host := range hosts {
-		hostName := host.Name()
+	for _, vm := range vms {
+		vmName := vm.Name()
 		querySpec := types.PerfQuerySpec{
-			Entity:     host.Reference(),
+			Entity:     vm.Reference(),
 			MaxSample:  1,
 			IntervalId: 20,
 		}
@@ -163,7 +163,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				desc := countersInfoMap[int(series.Id.CounterId)]
 				if desc != nil {
 					ch <- prometheus.MustNewConstMetric(desc,
-						prometheus.GaugeValue, float64(series.Value[0]), hostName, series.Id.Instance, metric.Entity.Type)
+						prometheus.GaugeValue, float64(series.Value[0]), vmName, series.Id.Instance, metric.Entity.Type)
 				}
 			}
 		}
